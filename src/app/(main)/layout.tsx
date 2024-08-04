@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const { setTheme } = useTheme()
 
     return (
-        <div className="flex flex-col items-end w-[25%] mx-auto">
+        <div className="flex flex-col items-end w-[40%] mx-auto">
             <div className="pt-[30px]">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
