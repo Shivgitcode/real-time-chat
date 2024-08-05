@@ -59,7 +59,7 @@ export default function Home() {
                                         <AvatarImage src={`/${el.img}`}></AvatarImage>
                                         <AvatarFallback>DM</AvatarFallback>
                                     </Avatar>
-                                    <span>John Doe</span>
+                                    <span>{session.data?.user?.name?.split(" ")[0].toLowerCase()}</span>
                                 </CommandItem>
                             })}
 
@@ -79,11 +79,11 @@ export default function Home() {
 
                     <CardHeader className="flex flex-row items-center gap-[30px] ">
                         <div className="relative w-[70px] h-[70px] ">
-                            <Image src="/doma.png" alt="hello" fill className="rounded-full"></Image>
+                            <Image src={session.data?.user?.image as string} alt="hello" fill className="rounded-full"></Image>
                         </div>
                         <div className="flex flex-col gap-[10px]">
-                            <CardTitle>Shivansh</CardTitle>
-                            <p className="text-xl text-muted-foreground">@shivn</p>
+                            <CardTitle>{session.data?.user?.name?.split(" ")[0]}</CardTitle>
+                            <p className="text-xl text-muted-foreground">@{session.data?.user?.email?.slice(0, 5)}</p>
                         </div>
 
 
