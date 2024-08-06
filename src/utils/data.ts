@@ -58,3 +58,47 @@ export const sendMessage = async (receiverId: string, messageBody: string) => {
 
 
 }
+
+export const getMessages = async (receiverId: string) => {
+    const currUser = await getServerSession(authOptions)
+    const findUser = await prisma.user.findFirst({
+        where: {
+            email: currUser?.user?.email as string
+        }
+    })
+
+    const conversation = await prisma.conversation.findFirst({
+        where: {
+            participantIds: {
+                hasEvery: [receiverId, findUser?.id as string]
+            }
+        },
+        include: {
+            messages: {
+                orderBy: {
+                    sendAt: "asc"
+                }
+            }
+        }
+    })
+
+    return conversation
+
+
+
+}
+
+export const getUsersForSidebar = async () => {
+    const currUser = await getServerSession(authOptions)
+    const allUser = await prisma.user.findMany({
+        where: {
+            email: {
+                not: currUser?.user?.email as string
+            }
+        }
+
+    })
+    return allUser
+
+
+}

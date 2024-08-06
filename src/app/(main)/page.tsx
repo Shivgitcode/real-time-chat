@@ -29,16 +29,34 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { getUsersForSidebar, sendMessage } from "@/utils/data";
+import { useUserStore } from "@/zustand/user";
 
 export default function Home() {
     const session = useSession()
     const router = useRouter()
+    const { users, allUsers } = useUserStore()
+
+    const handleLogout = () => {
+        signOut()
+        router.push("/login")
+    }
+
+
 
     useEffect(() => {
         if (session.status === "unauthenticated") {
-            router.push("/login")
+            return router.push("/login")
         }
-    })
+        const fetchUsers = async () => {
+            const data = await getUsersForSidebar()
+            console.log(data)
+            allUsers(data)
+
+        }
+        fetchUsers()
+
+    }, [])
 
 
 
@@ -53,13 +71,13 @@ export default function Home() {
                         <CommandInput placeholder="search"></CommandInput>
                         <CommandList>
                             <CommandEmpty>No result Found</CommandEmpty>
-                            {messages.map((el) => {
+                            {users?.map((el) => {
                                 return <CommandItem className="bg-transparent">
-                                    <Avatar className="mr-3">
-                                        <AvatarImage src={`/${el.img}`}></AvatarImage>
+                                    <Avatar className="mr-3 cursor-pointer">
+                                        <AvatarImage src={`${el.image}`}></AvatarImage>
                                         <AvatarFallback>DM</AvatarFallback>
                                     </Avatar>
-                                    <span>{session.data?.user?.name?.split(" ")[0].toLowerCase()}</span>
+                                    <span>{el.name?.split(" ")[0].toLowerCase()}</span>
                                 </CommandItem>
                             })}
 
@@ -67,7 +85,7 @@ export default function Home() {
 
                     </Command>
 
-                    <Button variant={"outline"} className="mt-[100px]" onClick={() => signOut()}>
+                    <Button variant={"outline"} className="mt-[100px]" onClick={handleLogout}>
                         <LogOut></LogOut>
                     </Button>
                 </Card>
@@ -104,8 +122,7 @@ export default function Home() {
                     <CardFooter className="gap-5">
                         <Input type="text" placeholder="Message"></Input>
                         <Button size={"icon"} variant="secondary">
-                            <SendIcon className="h-4 w-4"></SendIcon>
-
+                            <SendIcon className="h-4 w-4" ></SendIcon>
                         </Button>
 
                     </CardFooter>
