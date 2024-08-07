@@ -74,7 +74,11 @@ export const getMessages = async (receiverId: string) => {
             }
         },
         include: {
+            participants: true,
             messages: {
+                include: {
+                    sender: true
+                },
                 orderBy: {
                     sendAt: "asc"
                 }

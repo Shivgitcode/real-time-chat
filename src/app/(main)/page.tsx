@@ -7,37 +7,28 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import {
-    Command,
-    CommandDialog,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-    CommandSeparator,
-    CommandShortcut,
-} from "@/components/ui/command"
 
 import { Badge } from "@/components/ui/badge";
 import { messages } from "@/utils/util";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LogOut, SendIcon } from "lucide-react";
+import { LogOut, SendIcon, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useEffect } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { getMessages, getUsersForSidebar, sendMessage } from "@/utils/data";
-import { useUserStore } from "@/zustand/user";
+import { Users, useUserStore } from "@/zustand/user";
 import { useStore } from "@/zustand/store";
+import { CommandDemo } from "@/components/CommandInput";
 
 export default function Home() {
     const session = useSession()
     const router = useRouter()
     const { users, allUsers, } = useUserStore()
     const { conversations, setConversation } = useStore()
+    const [myUsers, setMyUsers] = useState<Users[] | []>([])
 
     const handleLogout = () => {
         signOut()
@@ -54,6 +45,7 @@ export default function Home() {
             const data = await getUsersForSidebar()
             console.log(data)
             allUsers(data)
+            setMyUsers(data)
 
         }
         fetchUsers()
@@ -62,9 +54,24 @@ export default function Home() {
 
     }, [])
 
-    const selectConversation = (id: string) => {
-        console.log(id)
+    const selectConversation = async (id: string) => {
+        const data = await getMessages(id)
+        setConversation(data)
 
+
+
+    }
+
+    const handleAllUsers = (e: FormEvent) => {
+        const input = e.target as HTMLInputElement
+        setMyUsers(
+            users.filter((el) => {
+                if (el.name.toLowerCase().includes(input.value.toLowerCase())) {
+                    return el
+                }
+            })
+        )
+        console.log(myUsers)
     }
 
 
@@ -76,36 +83,31 @@ export default function Home() {
         <div className=" flex flex-col items-center w-full">
 
 
-            <Card className="w-full mt-[200px] flex flex-row justify-center items-start ">
-                <Card className="w-[30%] flex flex-col justify-between items-start">
-                    <Command className=" min-h-[286px]" >
-                        <CommandInput placeholder="search"></CommandInput>
-                        <CommandList>
-                            <CommandEmpty>No result Found</CommandEmpty>
-                            <CommandGroup heading="users">
-                                {users?.map((el) => {
-                                    return (
-                                        <CommandItem key={el.id} onClick={() => selectConversation(el.id)} className="relative z-10">
-                                            <Avatar className="mr-3">
-                                                <AvatarImage src={`${el.image}`}></AvatarImage>
-                                                <AvatarFallback>DM</AvatarFallback>
-                                            </Avatar>
-                                            <span>{el.name?.split(" ")[0].toLowerCase()}</span>
-                                        </CommandItem>
+            <div className="w-full mt-[200px] flex flex-row  justify-center  ">
+                <Card className="flex flex-col items-start p-4 min-h-full justify-start relative">
+                    <div className="flex items-center gap-4">
+                        <Search />
+                        <Input type="text" placeholder="search" onChange={handleAllUsers} />
+                    </div>
+                    <div className="flex mt-5 flex-col items-start gap-3">
+                        {myUsers?.map((el) => (
+                            <div className={`flex items-center gap-3 w-full cursor-pointer`} key={el.id} onClick={() => selectConversation(el.id)}>
+                                <Avatar>
+                                    <AvatarImage src={`${el.image}`}></AvatarImage>
+                                    <AvatarFallback>DM</AvatarFallback>
+                                </Avatar>
+                                <span>{el.name.split(" ")[0].toLowerCase()}</span>
+                            </div>
+                        ))}
+                    </div>
 
-                                    )
-                                })}
+                    <div className=" absolute bottom-5">
+                        <Button variant={"outline"} onClick={handleLogout}>
+                            <LogOut></LogOut>
+                        </Button>
+                    </div>
 
 
-                            </CommandGroup>
-
-                        </CommandList>
-
-                    </Command>
-
-                    <Button variant={"outline"} className="mt-[100px]" onClick={handleLogout}>
-                        <LogOut></LogOut>
-                    </Button>
                 </Card>
 
 
@@ -124,15 +126,18 @@ export default function Home() {
 
                     </CardHeader>
                     <CardContent className="w-full flex flex-col items-start gap-5">
-                        {messages.map((message) => {
-                            return <div className={`${message.email === "random@gmail.com" ? " self-end flex-row-reverse" : "text-left"}  text-lg text-semibold flex gap-3 `}>
-                                <Avatar>
-                                    <AvatarImage src={`/${message.img}`}></AvatarImage>
-                                    <AvatarFallback>DM</AvatarFallback>
-                                </Avatar>
-                                <Badge key={message.id} variant={"secondary"} className={`${message.email === "random@gmail.com" ? " self-end" : "text-left"}  text-lg text-semibold`}>{message.message}</Badge>
-                            </div>
-                        })}
+                        {
+                            conversations?.messages! ? conversations?.messages.map((conversation) => {
+                                return <div className={`${conversation.sender.email === session.data?.user?.email ? " self-end flex-row-reverse" : "text-left"}  text-lg text-semibold flex gap-3 `}>
+                                    <Avatar>
+                                        <AvatarImage src={`/${conversation.sender.image}`}></AvatarImage>
+                                        <AvatarFallback>DM</AvatarFallback>
+                                    </Avatar>
+                                    <Badge key={conversation.sender.id} variant={"secondary"} className={`${conversation.sender.email === session.data?.user?.email ? " self-end" : "text-left"}  text-lg text-semibold`}>{message.message}</Badge>
+                                </div>
+                            }) : <p className="flex justify-center items-center p-32 text-center w-full">Welcome to chat buddies {session.data?.user?.name}</p>
+                        }
+
 
                     </CardContent>
 
@@ -148,7 +153,7 @@ export default function Home() {
                 </Card>
 
 
-            </Card>
+            </div>
 
 
         </div>

@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 
-interface Users {
+export interface Users {
     id: string
     name: string
     email: string
