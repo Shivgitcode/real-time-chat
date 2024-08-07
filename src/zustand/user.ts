@@ -10,11 +10,15 @@ export interface Users {
 }
 
 type User = {
-    users: Users[] | null
+    users: Users[] | null,
+    myUsers: Users[] | null
     allUsers: (user: any) => void
+    handleUsers: (user: any, value: string) => void
 }
 
 export const useUserStore = create<User>((set) => ({
     users: null,
-    allUsers: (user: any) => set({ users: user })
+    myUsers: null,
+    allUsers: (user: Users[]) => set({ users: user }),
+    handleUsers: (user: Users[], value: string) => set({ myUsers: user.filter(el => { el.name.includes(value) }) })
 }))

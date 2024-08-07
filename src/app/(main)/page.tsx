@@ -26,9 +26,8 @@ import { CommandDemo } from "@/components/CommandInput";
 export default function Home() {
     const session = useSession()
     const router = useRouter()
-    const { users, allUsers, } = useUserStore()
+    const { users, myUsers, allUsers, handleUsers } = useUserStore()
     const { conversations, setConversation } = useStore()
-    const [myUsers, setMyUsers] = useState<Users[] | []>([])
 
     const handleLogout = () => {
         signOut()
@@ -45,7 +44,7 @@ export default function Home() {
             const data = await getUsersForSidebar()
             console.log(data)
             allUsers(data)
-            setMyUsers(data)
+
 
         }
         fetchUsers()
@@ -64,13 +63,8 @@ export default function Home() {
 
     const handleAllUsers = (e: FormEvent) => {
         const input = e.target as HTMLInputElement
-        setMyUsers(
-            users.filter((el) => {
-                if (el.name.toLowerCase().includes(input.value.toLowerCase())) {
-                    return el
-                }
-            })
-        )
+        handleUsers(users, input.value)
+
         console.log(myUsers)
     }
 
