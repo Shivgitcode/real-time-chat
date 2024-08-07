@@ -29,13 +29,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { getUsersForSidebar, sendMessage } from "@/utils/data";
+import { getMessages, getUsersForSidebar, sendMessage } from "@/utils/data";
 import { useUserStore } from "@/zustand/user";
+import { useStore } from "@/zustand/store";
 
 export default function Home() {
     const session = useSession()
     const router = useRouter()
-    const { users, allUsers } = useUserStore()
+    const { users, allUsers, } = useUserStore()
+    const { conversations, setConversation } = useStore()
 
     const handleLogout = () => {
         signOut()
@@ -56,7 +58,16 @@ export default function Home() {
         }
         fetchUsers()
 
+
+
     }, [])
+
+    const selectConversation = (id: string) => {
+        console.log(id)
+
+    }
+
+
 
 
 
@@ -65,21 +76,28 @@ export default function Home() {
         <div className=" flex flex-col items-center w-full">
 
 
-            <Card className="w-full mt-[200px] flex flex-row justify-center items-start">
+            <Card className="w-full mt-[200px] flex flex-row justify-center items-start ">
                 <Card className="w-[30%] flex flex-col justify-between items-start">
-                    <Command className="min-h-full">
+                    <Command className=" min-h-[286px]" >
                         <CommandInput placeholder="search"></CommandInput>
                         <CommandList>
                             <CommandEmpty>No result Found</CommandEmpty>
-                            {users?.map((el) => {
-                                return <CommandItem className="bg-transparent">
-                                    <Avatar className="mr-3 cursor-pointer">
-                                        <AvatarImage src={`${el.image}`}></AvatarImage>
-                                        <AvatarFallback>DM</AvatarFallback>
-                                    </Avatar>
-                                    <span>{el.name?.split(" ")[0].toLowerCase()}</span>
-                                </CommandItem>
-                            })}
+                            <CommandGroup heading="users">
+                                {users?.map((el) => {
+                                    return (
+                                        <CommandItem key={el.id} onClick={() => selectConversation(el.id)} className="relative z-10">
+                                            <Avatar className="mr-3">
+                                                <AvatarImage src={`${el.image}`}></AvatarImage>
+                                                <AvatarFallback>DM</AvatarFallback>
+                                            </Avatar>
+                                            <span>{el.name?.split(" ")[0].toLowerCase()}</span>
+                                        </CommandItem>
+
+                                    )
+                                })}
+
+
+                            </CommandGroup>
 
                         </CommandList>
 
@@ -92,7 +110,6 @@ export default function Home() {
 
 
                 <Card className="w-full">
-
 
 
                     <CardHeader className="flex flex-row items-center gap-[30px] ">
