@@ -22,13 +22,17 @@ import { getMessages, getUsersForSidebar, sendMessage } from "@/utils/data";
 import { Users, useUserStore } from "@/zustand/user";
 import { Conversation, Messages, useStore } from "@/zustand/store";
 import { CommandDemo } from "@/components/CommandInput";
+import useMyContext from "@/AppContextProvider/AppContext";
+import { arrayBuffer } from "stream/consumers";
 
 export default function Home() {
     const session = useSession()
     const router = useRouter()
     const [userToSendId, setUserToSendId] = useState("")
+    const { socket } = useMyContext()
     const [body, setBody] = useState("")
     const { users, myUsers, allUsers, handleUsers } = useUserStore()
+
 
     const [selected, setSelected] = useState<String | null>("")
     const { conversations, setConversation } = useStore()
@@ -47,6 +51,13 @@ export default function Home() {
 
     useEffect(() => {
 
+        if (!socket) return;
+
+
+        socket.send(Buffer.from(JSON.stringify({ email: session.data?.user?.email })))
+
+
+
 
         const fetchUsers = async () => {
             const data = await getUsersForSidebar()
@@ -56,6 +67,14 @@ export default function Home() {
 
         }
         fetchUsers()
+
+
+
+
+
+
+
+
 
 
 

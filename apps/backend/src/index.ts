@@ -7,9 +7,25 @@ const server = app.listen(5000, () => {
 })
 // const socket = new WebSocketServer()
 const wss = new WebSocketServer({ server })
+const userIds: String[] = []
+
 
 wss.on("connection", (socket) => {
-    socket.send("connection open")
+    socket.on("error", console.error)
+    socket.on("message", (data) => {
+
+
+
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(data, { binary: false })
+            }
+        })
+
+
+
+
+    })
 
 })
 

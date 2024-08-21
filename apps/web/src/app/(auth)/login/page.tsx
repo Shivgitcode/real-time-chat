@@ -1,5 +1,6 @@
 "use client";
 
+import useMyContext from "@/AppContextProvider/AppContext";
 import { Button } from "@/components/ui/button"
 import { ChromeIcon } from "lucide-react"
 import { signIn, useSession } from "next-auth/react"
@@ -9,9 +10,11 @@ import { useEffect } from "react";
 export default function page() {
     const session = useSession()
     const router = useRouter()
+    const { socket } = useMyContext()
 
     const handleSignin = () => {
         signIn("google")
+
     }
 
     useEffect(() => {

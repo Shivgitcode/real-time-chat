@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsup ./src/index.ts && nodemon dist/index.js"
+    "dev": "tsup ./src/index.ts && nodemon --exec ts-node ./src/index.ts"
   },
   "keywords": [],
   "author": "",
