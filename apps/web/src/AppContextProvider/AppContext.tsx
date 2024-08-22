@@ -6,29 +6,49 @@ import { createContext, useContext, useEffect, useState } from "react"
 interface Context {
     socket: WebSocket | null | undefined,
     setIsLoggedIn?: React.Dispatch<React.SetStateAction<boolean>>
+    onlineUser: null | { email: string }
 }
 
 export const AppContext = createContext<Context | undefined>(undefined)
 
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
     const [socket, setSocket] = useState<WebSocket | null>(null)
+    const [onlineUser, setOnlineUser] = useState<{ email: string } | null>({ email: "" })
     const session = useSession()
 
     useEffect(() => {
-        const newSocket = new WebSocket("ws://localhost:5000")
-        newSocket.onopen = () => {
-            console.log("connection established")
+        if (session.status === "authenticated" || session.status === "loading") {
+            const newSocket = new WebSocket("ws://localhost:5000")
+            newSocket.onopen = () => {
+                console.log("connection established")
+
+
+            }
+
+            newSocket.onmessage = (message) => {
+                console.log(typeof message.data)
+                setOnlineUser(JSON.parse(message.data))
+
+            }
+            setSocket(newSocket);
+            return () => newSocket.close();
 
         }
-        newSocket.onmessage = (message) => {
-            console.log(message.data)
+        else {
+            if (socket) {
+                socket?.close()
+                setSocket(null)
+
+            }
+
+
         }
-        setSocket(newSocket);
-        return () => newSocket.close();
-    }, [])
+
+    }, [session])
 
     const value: Context = {
-        socket
+        socket,
+        onlineUser
     }
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>

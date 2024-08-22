@@ -29,9 +29,11 @@ export default function Home() {
     const session = useSession()
     const router = useRouter()
     const [userToSendId, setUserToSendId] = useState("")
-    const { socket } = useMyContext()
+    const { socket, onlineUser } = useMyContext()
     const [body, setBody] = useState("")
     const { users, myUsers, allUsers, handleUsers } = useUserStore()
+    const [isOnline, setIsOnline] = useState(false)
+
 
 
     const [selected, setSelected] = useState<String | null>("")
@@ -51,10 +53,15 @@ export default function Home() {
 
     useEffect(() => {
 
+        console.log(socket)
+        console.log(isOnline)
+        console.log("this is online user", onlineUser)
+
         if (!socket) return;
 
 
         socket.send(Buffer.from(JSON.stringify({ email: session.data?.user?.email })))
+
 
 
 
@@ -67,6 +74,8 @@ export default function Home() {
 
         }
         fetchUsers()
+
+
 
 
 
@@ -128,6 +137,7 @@ export default function Home() {
                     <div className="flex mt-5 flex-col items-start gap-3 w-full">
                         {myUsers?.map((el) => (
                             <div className={`flex items-center gap-3 p-2 rounded min-w-full cursor-pointer ${selected === el.id ? "bg-gray-600 " : "bg-transparent"}`} key={el.id} onClick={() => selectConversation(el.id)}>
+                                <span className={`${isOnline ? "bg-green" : "hidden"}`}></span>
                                 <Avatar>
                                     <AvatarImage src={`${el.image}`}></AvatarImage>
                                     <AvatarFallback>DM</AvatarFallback>

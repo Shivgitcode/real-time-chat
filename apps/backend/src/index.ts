@@ -14,13 +14,7 @@ wss.on("connection", (socket) => {
     socket.on("error", console.error)
     socket.on("message", (data) => {
 
-
-
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(data, { binary: false })
-            }
-        })
+        socket.send(data, { binary: false })
 
 
 
