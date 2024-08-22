@@ -13,7 +13,7 @@ export const AppContext = createContext<Context | undefined>(undefined)
 
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
     const [socket, setSocket] = useState<WebSocket | null>(null)
-    const [onlineUser, setOnlineUser] = useState<{ email: string } | null>({ email: "" })
+    const [onlineUser, setOnlineUser] = useState<{ email: string } | null>(null)
     const session = useSession()
 
     useEffect(() => {
@@ -28,6 +28,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             newSocket.onmessage = (message) => {
                 console.log(typeof message.data)
                 setOnlineUser(JSON.parse(message.data))
+                console.log(onlineUser)
 
             }
             setSocket(newSocket);
