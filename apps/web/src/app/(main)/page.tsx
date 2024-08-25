@@ -53,14 +53,11 @@ export default function Home() {
 
     useEffect(() => {
 
-        console.log(socket)
-        console.log(isOnline)
-        console.log("this is online user", onlineUser)
+
 
         if (!socket) return;
 
 
-        socket.send(Buffer.from(JSON.stringify({ email: session.data?.user?.email })))
 
 
 
@@ -75,6 +72,12 @@ export default function Home() {
         }
         fetchUsers()
 
+        if (!onlineUser) {
+            return;
+        }
+        console.log(onlineUser)
+
+        setIsOnline(true)
 
 
 
@@ -88,7 +91,9 @@ export default function Home() {
 
 
 
-    }, [])
+    }, [socket, session.data?.user?.email])
+
+    console.log(isOnline)
 
 
     const selectConversation = async (id: string) => {
@@ -137,7 +142,9 @@ export default function Home() {
                     <div className="flex mt-5 flex-col items-start gap-3 w-full">
                         {myUsers?.map((el) => (
                             <div className={`flex items-center gap-3 p-2 rounded min-w-full cursor-pointer ${selected === el.id ? "bg-gray-600 " : "bg-transparent"}`} key={el.id} onClick={() => selectConversation(el.id)}>
-                                <span className={`${isOnline ? "bg-green" : "hidden"}`}></span>
+                                <div className={`${onlineUser?.includes(el.email) ? "bg-red-600 w-full" : "hidden"}`}>
+                                    hello
+                                </div>
                                 <Avatar>
                                     <AvatarImage src={`${el.image}`}></AvatarImage>
                                     <AvatarFallback>DM</AvatarFallback>

@@ -13,8 +13,14 @@ const userIds: String[] = []
 wss.on("connection", (socket) => {
     socket.on("error", console.error)
     socket.on("message", (data) => {
+        const socketData = data.toString()
+        userIds.push(socketData)
+        const dataString = userIds.join(",")
 
-        socket.send(data, { binary: false })
+
+
+
+        socket.send(Buffer.from(dataString), { binary: false })
 
 
 

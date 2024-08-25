@@ -6,28 +6,34 @@ import { createContext, useContext, useEffect, useState } from "react"
 interface Context {
     socket: WebSocket | null | undefined,
     setIsLoggedIn?: React.Dispatch<React.SetStateAction<boolean>>
-    onlineUser: null | { email: string }
+    onlineUser: null | string[]
 }
 
 export const AppContext = createContext<Context | undefined>(undefined)
 
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
     const [socket, setSocket] = useState<WebSocket | null>(null)
-    const [onlineUser, setOnlineUser] = useState<{ email: string } | null>(null)
+    const [onlineUser, setOnlineUser] = useState<string[] | null>(null)
+    const data: string[] = []
     const session = useSession()
 
     useEffect(() => {
-        if (session.status === "authenticated" || session.status === "loading") {
+        if (session.status === "authenticated") {
             const newSocket = new WebSocket("ws://localhost:5000")
             newSocket.onopen = () => {
                 console.log("connection established")
+                data.push(session.data.user?.email as string)
+
+                newSocket.send(Buffer.from(data.toString()))
+
+
 
 
             }
 
             newSocket.onmessage = (message) => {
-                console.log(typeof message.data)
-                setOnlineUser(JSON.parse(message.data))
+                const userData = message.data
+                setOnlineUser(userData.split(","))
                 console.log(onlineUser)
 
             }
@@ -45,7 +51,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
 
         }
 
-    }, [session])
+    }, [session.status])
+
 
     const value: Context = {
         socket,
