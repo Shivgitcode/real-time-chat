@@ -7,12 +7,13 @@ const server = app.listen(5000, () => {
 })
 // const socket = new WebSocketServer()
 const wss = new WebSocketServer({ server })
-const userIds: String[] = []
+let userIds: String[] = []
 
 
 wss.on("connection", (socket) => {
     socket.on("error", console.error)
     socket.on("message", (data) => {
+        console.log(data.toString())
         const socketData = data.toString()
         userIds.push(socketData)
         const dataString = userIds.join(",")
@@ -21,6 +22,15 @@ wss.on("connection", (socket) => {
 
 
         socket.send(Buffer.from(dataString), { binary: false })
+
+        socket.on("close", (data) => {
+            userIds = userIds.filter(userId => userId !== socketData)
+
+
+        })
+
+
+
 
 
 

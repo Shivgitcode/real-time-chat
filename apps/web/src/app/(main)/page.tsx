@@ -20,7 +20,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { getMessages, getUsersForSidebar, sendMessage } from "@/utils/data";
 import { Users, useUserStore } from "@/zustand/user";
-import { Conversation, Messages, useStore } from "@/zustand/store";
+import { Conversation, Store, useStore } from "@/zustand/store";
 import { CommandDemo } from "@/components/CommandInput";
 import useMyContext from "@/AppContextProvider/AppContext";
 import { arrayBuffer } from "stream/consumers";
@@ -36,8 +36,9 @@ export default function Home() {
 
 
 
+
     const [selected, setSelected] = useState<String | null>("")
-    const { conversations, setConversation } = useStore()
+    const { conversations, setConversation, receiverId, setReceiverId } = useStore()
 
     const handleLogout = () => {
         signOut()
@@ -52,6 +53,8 @@ export default function Home() {
 
 
     useEffect(() => {
+        console.log("these are online users", onlineUser)
+
 
 
 
@@ -75,10 +78,8 @@ export default function Home() {
         if (!onlineUser) {
             return;
         }
-        console.log(onlineUser)
 
-        setIsOnline(true)
-
+        setIsOnline(!isOnline)
 
 
 
@@ -91,7 +92,8 @@ export default function Home() {
 
 
 
-    }, [socket, session.data?.user?.email])
+
+    }, [onlineUser])
 
     console.log(isOnline)
 
@@ -102,7 +104,9 @@ export default function Home() {
         const data = await getMessages(id)
         console.log(conversations)
         // console.log("this id is for reciever: ", userToSendId)
+        setReceiverId(id)
         setConversation(data)
+
 
 
 
@@ -141,9 +145,8 @@ export default function Home() {
                     </div>
                     <div className="flex mt-5 flex-col items-start gap-3 w-full">
                         {myUsers?.map((el) => (
-                            <div className={`flex items-center gap-3 p-2 rounded min-w-full cursor-pointer ${selected === el.id ? "bg-gray-600 " : "bg-transparent"}`} key={el.id} onClick={() => selectConversation(el.id)}>
-                                <div className={`${onlineUser?.includes(el.email) ? "bg-red-600 w-full" : "hidden"}`}>
-                                    hello
+                            <div className={`flex items-center gap-3 p-2 relative rounded min-w-full cursor-pointer ${selected === el.id ? "bg-gray-600 " : "bg-transparent"}`} key={el.id} onClick={() => selectConversation(el.id)}>
+                                <div className={`${onlineUser?.includes(el.email) ? "absolute bg-green-500 z-10 rounded-full w-2 h-2 top-3" : "hidden"}`}>
                                 </div>
                                 <Avatar>
                                     <AvatarImage src={`${el.image}`}></AvatarImage>
@@ -178,7 +181,7 @@ export default function Home() {
 
 
                     </CardHeader>
-                    <CardContent className="w-full flex flex-col items-start gap-5">
+                    <CardContent className="w-full flex flex-col items-start gap-5 h-[300px]">
                         {
                             conversations?.messages! ? conversations?.messages.map((conversation) => {
                                 return <div className={`${conversation.sender.email === session.data?.user?.email ? " self-end flex-row-reverse" : "text-left"}  text-lg text-semibold flex gap-3 `}>

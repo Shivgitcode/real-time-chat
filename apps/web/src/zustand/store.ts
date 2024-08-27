@@ -24,13 +24,16 @@ export interface Conversation {
 }
 
 
-export interface Messages {
+export interface Store {
     conversations: null | Conversation
-
+    receiverId: string,
+    setReceiverId: (id: string) => void
     setConversation: (conversation: Conversation) => void
 }
 
-export const useStore = create<Messages>((set) => ({
+export const useStore = create<Store>((set) => ({
     conversations: null,
-    setConversation: (conversation: Conversation) => set((state) => ({ conversations: conversation }))
+    receiverId: "",
+    setConversation: (conversation: Conversation) => set((state) => ({ conversations: conversation })),
+    setReceiverId: (id: string) => set(({ receiverId: id }))
 }))

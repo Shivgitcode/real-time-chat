@@ -6,7 +6,8 @@ import { createContext, useContext, useEffect, useState } from "react"
 interface Context {
     socket: WebSocket | null | undefined,
     setIsLoggedIn?: React.Dispatch<React.SetStateAction<boolean>>
-    onlineUser: null | string[]
+    onlineUser: null | string[],
+    setOnlineUser: React.Dispatch<React.SetStateAction<string[] | null>>
 }
 
 export const AppContext = createContext<Context | undefined>(undefined)
@@ -42,11 +43,10 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
 
         }
         else {
-            if (socket) {
-                socket?.close()
-                setSocket(null)
+            socket?.close()
+            setSocket(null)
 
-            }
+
 
 
         }
@@ -56,7 +56,9 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
 
     const value: Context = {
         socket,
-        onlineUser
+        onlineUser,
+        setOnlineUser
+
     }
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>
