@@ -20,7 +20,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { getMessages, getUsersForSidebar, sendMessage } from "@/utils/data";
 import { Users, useUserStore } from "@/zustand/user";
-import { Conversation, Store, useStore } from "@/zustand/store";
+import { Conversation, Message, Store, useStore } from "@/zustand/store";
 import { CommandDemo } from "@/components/CommandInput";
 import useMyContext from "@/AppContextProvider/AppContext";
 import { arrayBuffer } from "stream/consumers";
@@ -33,6 +33,7 @@ export default function Home() {
     const [body, setBody] = useState("")
     const { users, myUsers, allUsers, handleUsers } = useUserStore()
     const [isOnline, setIsOnline] = useState(false)
+    const [userMessages, setUserMessages] = useState<Message[] | undefined>(undefined)
 
 
 
@@ -102,10 +103,12 @@ export default function Home() {
         setUserToSendId(id)
         setSelected(id)
         const data = await getMessages(id)
+        console.log("this is my data", data)
         console.log(conversations)
         // console.log("this id is for reciever: ", userToSendId)
         setReceiverId(id)
         setConversation(data)
+        setUserMessages(data?.messages)
 
 
 
@@ -122,11 +125,16 @@ export default function Home() {
     const handleMessage = async () => {
 
         console.log(userToSendId);
-        await sendMessage(userToSendId as string, body)
+        if (!socket) return;
+        console.log("sending message")
+        socket?.send(body)
+        // await sendMessage(userToSendId as string, body)
         setBody("")
 
 
     }
+
+    console.log("these are new messages", userMessages)
 
 
 
@@ -183,7 +191,7 @@ export default function Home() {
                     </CardHeader>
                     <CardContent className="w-full flex flex-col items-start gap-5 h-[300px]">
                         {
-                            conversations?.messages! ? conversations?.messages.map((conversation) => {
+                            userMessages! ? userMessages?.map((conversation) => {
                                 return <div className={`${conversation.sender.email === session.data?.user?.email ? " self-end flex-row-reverse" : "text-left"}  text-lg text-semibold flex gap-3 `}>
                                     <Avatar>
                                         <AvatarImage src={`${conversation.sender.image}`}></AvatarImage>

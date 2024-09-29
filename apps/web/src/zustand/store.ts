@@ -1,7 +1,7 @@
 "use client";
 import { create } from "zustand"
 import { Users } from "./user";
-type Message = {
+export type Message = {
     id: string
     sendAt: string
     conversationId: string

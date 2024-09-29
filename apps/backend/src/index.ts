@@ -15,6 +15,7 @@ wss.on("connection", (socket) => {
     socket.on("message", (data) => {
         console.log(data.toString())
         const socketData = data.toString()
+        console.log(socketData)
         userIds.push(socketData)
         const dataString = userIds.join(",")
 
@@ -22,6 +23,7 @@ wss.on("connection", (socket) => {
 
 
         socket.send(Buffer.from(dataString), { binary: false })
+
 
         socket.on("close", (data) => {
             userIds = userIds.filter(userId => userId !== socketData)
